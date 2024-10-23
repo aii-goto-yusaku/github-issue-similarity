@@ -19,27 +19,55 @@ A system that automatically detects similar issues and provides recommendations 
 
 ## Installation
 
+### Prerequisites
+
+- Python 3.11 or higher
+- [uv](https://github.com/astral-sh/uv) - Fast Python package installer and resolver
+
+If you don't have uv installed, our setup script will install it for you.
+
+### Setup
+
 1. Clone the repository:
 ```bash
 git clone https://github.com/aii-goto-yusaku/github-issue-similarity.git
 cd github-issue-similarity
 ```
 
-2. Create and activate a virtual environment:
+2. Run the setup script:
 ```bash
-python -m venv .venv
+./scripts/setup-dev.sh
+```
+
+This will:
+- Install uv if not present
+- Create a virtual environment
+- Install all dependencies including development tools
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### Manual Setup (Alternative)
+
+If you prefer to set up manually:
+
+1. Install uv:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. Create and activate virtual environment:
+```bash
+uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 3. Install dependencies:
 ```bash
-pip install -r requirements.txt
-```
-
-4. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
+uv pip install --no-cache -e ".[dev]"
 ```
 
 ## Configuration

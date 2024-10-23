@@ -20,14 +20,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies and uv
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy project configuration
+COPY pyproject.toml .
+
+# Install dependencies using uv
+RUN ~/.cargo/bin/uv pip install --no-cache .
 
 # Copy application code
 COPY . .
@@ -83,9 +87,17 @@ docker-compose up -d
 ### 1. Create Virtual Environment
 
 ```bash
-python -m venv /opt/github-issue-similarity/venv
-source /opt/github-issue-similarity/venv/bin/activate
-pip install -r requirements.txt
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Create and activate virtual environment
+cd /opt/github-issue-similarity
+uv venv
+source .venv/bin/activate
+
+# Install dependencies
+uv pip install --no-cache .
 ```
 
 ### 2. Create Systemd Service

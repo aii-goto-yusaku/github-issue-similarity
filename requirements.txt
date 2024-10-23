@@ -1,6 +1,0 @@
-fastapi==0.115.3
-uvicorn==0.32.0
-PyGithub==2.4.0
-sentence-transformers==3.2.1
-python-dotenv==1.0.1
-scikit-learn==1.5.2
