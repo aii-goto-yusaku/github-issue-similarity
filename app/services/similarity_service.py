@@ -4,9 +4,11 @@ import os
 import numpy as np
 
 class SimilarityService:
+    DEFAULT_MODEL = 'paraphrase-multilingual-mpnet-base-v2'
+
     def __init__(self):
         # 日本語と英語の両方に対応したモデルを使用
-        self.model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+        self.model = SentenceTransformer(self.DEFAULT_MODEL)
         self.threshold = float(os.getenv('SIMILARITY_THRESHOLD', 0.8))
     
     def _combine_text(self, title: str, body: str) -> str:
@@ -41,3 +43,7 @@ class SimilarityService:
         # 類似度でソート
         similar_issues.sort(key=lambda x: x[1], reverse=True)
         return similar_issues
+    
+    def get_model_name(self) -> str:
+        """使用している言語モデルの名前を取得"""
+        return self.DEFAULT_MODEL

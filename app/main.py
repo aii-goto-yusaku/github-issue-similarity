@@ -1,17 +1,84 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from .services.github_service import GitHubService
+from .services.github_service import GitHubService, GitHubConfigError
 from .services.similarity_service import SimilarityService
 import os
+from typing import Dict, Any
 
 load_dotenv()
 
-app = FastAPI()
-github_service = GitHubService(os.getenv("GITHUB_TOKEN"), os.getenv("GITHUB_REPO"))
-similarity_service = SimilarityService()
+app = FastAPI(
+    title="GitHub Issue Similarity Detector",
+    description="A service that detects and recommends similar GitHub issues",
+    version="0.1.0",
+)
+
+try:
+    github_service = GitHubService(os.getenv("GITHUB_TOKEN"), os.getenv("GITHUB_REPO"))
+    similarity_service = SimilarityService()
+except GitHubConfigError as e:
+    # サービス初期化時のエラーを記録
+    initialization_error = str(e)
+else:
+    initialization_error = None
+
+@app.get("/health")
+async def health_check() -> Dict[str, Any]:
+    """
+    システムの健全性をチェックするエンドポイント。
+    以下の項目を確認します：
+    - GitHubサービスの接続状態
+    - 環境変数の設定状態
+    - Similarity Serviceの状態
+    """
+    if initialization_error:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "error": initialization_error,
+                "message": "Service failed to initialize properly"
+            }
+        )
+
+    health_status = {
+        "status": "healthy",
+        "version": "0.1.0",
+        "services": {
+            "similarity_service": {
+                "status": "healthy",
+                "model": similarity_service.model.get_model_name()
+            }
+        }
+    }
+
+    # GitHub接続状態を確認
+    github_status = github_service.check_connection()
+    health_status["services"]["github"] = github_status
+
+    # 全体的な健全性を判断
+    if not github_status["github_connection"]:
+        health_status["status"] = "degraded"
+        return JSONResponse(status_code=503, content=health_status)
+
+    return health_status
 
 @app.post("/webhook")
-async def github_webhook(request: Request):
+async def github_webhook(request: Request) -> Dict[str, str]:
+    """
+    GitHubからのWebhookを受け取り、Issue類似度の分析を行うエンドポイント
+    """
+    if initialization_error:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "error",
+                "message": "Service is not properly initialized",
+                "error": initialization_error
+            }
+        )
+
     payload = await request.json()
     
     # Issue作成イベントの場合のみ処理
@@ -37,6 +104,16 @@ async def github_webhook(request: Request):
             for sim_issue, similarity in similar_issues:
                 comment_body += f"- #{sim_issue.number} ({similarity:.2%} 類似): {sim_issue.title}\n"
             
-            github_service.add_comment(issue_number, comment_body)
+            try:
+                github_service.add_comment(issue_number, comment_body)
+            except Exception as e:
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "status": "error",
+                        "message": "Failed to add comment",
+                        "error": str(e)
+                    }
+                )
     
     return {"status": "success"}
