@@ -69,6 +69,11 @@ async def github_webhook(request: Request) -> Dict[str, str]:
     """
     GitHubからのWebhookを受け取り、Issue類似度の分析を行うエンドポイント
     """
+    # TODO: GitHub Webhook Secretを使用した署名検証機能の実装
+    # - X-Hub-Signatureヘッダーの検証を行う
+    # - HMAC-SHA256を使用した署名の検証
+    # - 不正なリクエストの拒否
+    # 参考: https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
     if initialization_error:
         return JSONResponse(
             status_code=503,
@@ -88,8 +93,11 @@ async def github_webhook(request: Request) -> Dict[str, str]:
         issue_title = issue["title"]
         issue_body = issue["body"] or ""
         
-        # 既存のIssueを取得
-        existing_issues = github_service.get_open_issues()
+        # 既存のIssueを取得（現在作成されたIssueを除く）
+        existing_issues = [
+            issue for issue in github_service.get_open_issues()
+            if issue['number'] != issue_number
+        ]
         
         # 類似度の計算
         similar_issues = similarity_service.find_similar_issues(
@@ -102,7 +110,7 @@ async def github_webhook(request: Request) -> Dict[str, str]:
             # 類似Issueが見つかった場合、コメントを投稿
             comment_body = "似たような Issue が見つかりました：\n\n"
             for sim_issue, similarity in similar_issues:
-                comment_body += f"- #{sim_issue.number} ({similarity:.2%} 類似): {sim_issue.title}\n"
+                comment_body += f"- #{sim_issue['number']} ({similarity:.2%} 類似): {sim_issue['title']}\n"
             
             try:
                 github_service.add_comment(issue_number, comment_body)

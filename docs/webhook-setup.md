@@ -34,7 +34,7 @@ ngrok http 8000
 4. Configure the webhook:
    - Payload URL: `https://your-server:8000/webhook`
    - Content type: `application/json`
-   - Secret: (Optional but recommended for production)
+   - Secret: (Optional but recommended for production - Note: Secret verification is not yet implemented in the current version)
    - SSL verification: Enable for production
    - Events: Select "Issues"
 5. Click "Add webhook"
