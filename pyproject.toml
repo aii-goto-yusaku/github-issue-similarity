@@ -25,9 +25,11 @@ Repository = "https://github.com/aii-goto-yusaku/github-issue-similarity.git"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
-dev-dependencies = [
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[project.optional-dependencies]
+dev = [
     "black>=24.3.0",
     "isort>=5.13.2",
     "mypy>=1.9.0",
