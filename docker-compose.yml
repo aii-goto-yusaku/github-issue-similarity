@@ -10,10 +10,15 @@ services:
       - GITHUB_REPO=${GITHUB_REPO}
       - SIMILARITY_THRESHOLD=${SIMILARITY_THRESHOLD}
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     volumes:
-      - ./logs:/app/logs
+      - type: bind
+        source: ./logs
+        target: /app/logs
+        consistency: delegated
+    init: true
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
