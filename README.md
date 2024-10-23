@@ -60,12 +60,15 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 2. Configure GitHub webhook:
-   - Go to your repository settings
-   - Add webhook with URL: `http://your-server:8000/webhook`
-   - Select content type: `application/json`
-   - Choose "Issues" events
+   - Follow the [detailed webhook setup guide](docs/webhook-setup.md)
+   - Or quickly configure with these basic settings:
+     - URL: `http://your-server:8000/webhook`
+     - Content type: `application/json`
+     - Events: "Issues" only
 
 The system will now automatically analyze new issues and comment when similar issues are found.
+
+For security considerations and advanced configuration options, please refer to the [webhook setup guide](docs/webhook-setup.md).
 
 ## How it Works
 
