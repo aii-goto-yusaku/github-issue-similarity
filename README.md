@@ -54,10 +54,23 @@ SIMILARITY_THRESHOLD=0.8  # Minimum similarity score (0.0 to 1.0)
 
 ## Usage
 
+### Local Development
+
 1. Start the webhook server:
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+### Production Deployment
+
+For production deployment options, including:
+- Docker deployment
+- Systemd service
+- Cloud platforms (Google Cloud Run, Heroku)
+- Security considerations
+- Monitoring setup
+
+Please refer to our comprehensive [Deployment Guide](docs/deployment.md)
 
 2. Configure GitHub webhook:
    - Follow the [detailed webhook setup guide](docs/webhook-setup.md)
