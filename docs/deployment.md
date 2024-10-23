@@ -187,7 +187,21 @@ git push heroku main
 
 ### Monitoring
 
-1. **Application Monitoring**
+1. **Application Health Monitoring**
+   - Use the built-in health check endpoint:
+     ```bash
+     curl http://your-server:8000/health
+     ```
+   - Monitor the response for:
+     - Overall system status
+     - GitHub API connectivity
+     - Token validity
+     - Rate limit information
+     - Model status
+   - Set up automated health checks (e.g., Pingdom, UptimeRobot)
+   - Configure alerts for health status changes
+
+2. **Application Monitoring**
    - Set up logging (e.g., CloudWatch, Stackdriver)
    - Configure error tracking (e.g., Sentry)
    - Monitor application metrics
@@ -243,7 +257,7 @@ git push heroku main
 git pull origin main
 
 # Update dependencies
-pip install -U -r requirements.txt
+uv pip install --no-cache -U .
 
 # Restart service
 sudo systemctl restart github-issue-similarity

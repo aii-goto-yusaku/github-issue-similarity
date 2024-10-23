@@ -13,7 +13,6 @@ A system that automatically detects similar issues and provides recommendations 
 ## System Requirements
 
 - Python 3.11+
-- PostgreSQL (optional, for caching)
 - GitHub repository with Issues enabled
 - GitHub Personal Access Token with repo scope
 
@@ -108,6 +107,60 @@ Please refer to our comprehensive [Deployment Guide](docs/deployment.md)
      - Events: "Issues" only
 
 The system will now automatically analyze new issues and comment when similar issues are found.
+
+### Health Check
+
+You can verify the system status using the health check endpoint:
+
+```bash
+curl http://localhost:8000/health
+```
+
+The response will include:
+- Overall system status
+- GitHub connection status
+- Token and permissions verification
+- API rate limit information
+- Similarity service status
+
+Example response when healthy:
+```json
+{
+    "status": "healthy",
+    "version": "0.1.0",
+    "services": {
+        "similarity_service": {
+            "status": "healthy",
+            "model": "paraphrase-multilingual-mpnet-base-v2"
+        },
+        "github": {
+            "status": "healthy",
+            "github_connection": true,
+            "user": "username",
+            "repository": "owner/repo",
+            "rate_limit": 5000
+        }
+    }
+}
+```
+
+### Troubleshooting
+
+Common issues and their solutions:
+
+1. **GitHub Token Issues**
+   - Error: "GitHub token is not configured"
+   - Solution: Set the GITHUB_TOKEN environment variable
+   - How to: Create a token at https://github.com/settings/tokens
+
+2. **Repository Access Issues**
+   - Error: "Repository not found or not accessible"
+   - Solution: Check the GITHUB_REPO format (owner/repo) and token permissions
+
+3. **Service Status Issues**
+   - Use the `/health` endpoint to diagnose problems
+   - Check the logs for detailed error messages
+   - Verify environment variables are set correctly
 
 For security considerations and advanced configuration options, please refer to the [webhook setup guide](docs/webhook-setup.md).
 
